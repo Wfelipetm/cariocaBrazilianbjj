@@ -1,0 +1,13 @@
+.footer {
+    background-color: #042B3D; /* Fundo principal do footer */
+    color: #ADD8E6;
+  }
+  
+  .text-light-custom {
+    color: #ADD8E6 !important;
+  }
+  
+  .footer a:hover {
+    color: #094360 !important;
+  }
+  

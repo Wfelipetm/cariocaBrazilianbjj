@@ -1,0 +1,72 @@
+/* Estilo principal */
+.header {
+  background-color: #042B3D; /* Cor principal do header */
+  padding: 1rem 2rem;
+  color: #ADD8E6;
+  position: relative;
+  z-index: 999;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ADD8E6;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: #ADD8E6;
+  cursor: pointer;
+  display: none;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  color: #ADD8E6;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #094360;
+}
+
+/* Menu responsivo */
+@media (max-width: 768px) {
+  .menu-btn {
+    display: block;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #06364D;
+    flex-direction: column;
+    width: 200px;
+    transform: translateY(-200%);
+    transition: transform 0.4s;
+  }
+
+  .nav-links.open {
+    transform: translateY(0);
+  }
+
+  .nav-links a {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
