@@ -40,7 +40,8 @@ function Header() {
       <nav className="flex items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <img src="/cariocabjj.png" alt="Logo" className="w-20 lg:w-24" />
+          {/* <img src="/cariocabjj.png" alt="Logo" className="w-20 lg:w-24" /> */}
+        <div className="w-20 h-20 lg:w-24"/>
         </Link>
 
         {/* Botão do menu mobile - Colocado no final da linha */}
@@ -80,17 +81,17 @@ function Header() {
                     Presenças
                   </Link>
                 </li>
-                {/* <li>
-                  <Link href="/graduacao" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
+                <li>
+                  <Link href="/graduacao/grade-graduacao" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
                     Graduação
                   </Link>
                 </li>
                 <li>
-                  <Link href="/produtos" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
+                  <Link href="/produtos/produto" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
                     Produtos
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link href="/professores" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
                     Professores
                   </Link>
@@ -113,20 +114,20 @@ function Header() {
             </Link>
           </li>
           <li>
-            <Link href="/graduacao" className="text-white hover:text-gray-400">
+            <Link href="/graduacao/grade-graduacao" className="text-white hover:text-gray-400">
               Graduação
             </Link>
           </li>
           <li>
-            <Link href="/produtos" className="text-white hover:text-gray-400">
+            <Link href="/produtos/produto" className="text-white hover:text-gray-400">
               Produtos
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link href="/professores" className="text-white hover:text-gray-400">
               Professores
             </Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </header>

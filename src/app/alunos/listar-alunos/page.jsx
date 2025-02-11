@@ -5,13 +5,19 @@ import { useRouter } from 'next/navigation';  // Usando useRouter do Next.js
 import { ArrowLeft } from 'lucide-react';
 import Header from '../../componetes/Header/Header';  // Caminho para o Header
 import Footer from '../../componetes/Footer/Footer';
-
-import { Pencil, Trash, Save, XCircle } from 'lucide-react';  
+import { Pencil, Trash, Save, XCircle } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';  // Importa o ícone do WhatsApp
 
 function ListaAlunos() {
   const [alunos, setAlunos] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
-  const [alunoEditado, setAlunoEditado] = useState({ nome: '', email: '', telefone: '', contrato: '' });
+  const [alunoEditado, setAlunoEditado] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    matricula: '',
+    faixa_atual: ''
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -64,8 +70,9 @@ function ListaAlunos() {
                 <th className="py-2 px-4">Nome</th>
                 <th className="py-2 px-4">Email</th>
                 <th className="py-2 px-4">Telefone</th>
-                <th className="py-2 px-4">Contrato</th>
-                <th className="py-2 px-4">Ações</th>
+                <th className="py-2 px-4">Faixa Atual</th>
+                <th className="py-2 px-4">Matrícula</th>
+                <th className="py-2 px-4"></th>
               </tr>
             </thead>
             <tbody>
@@ -101,25 +108,31 @@ function ListaAlunos() {
                       <td className="py-2 px-4">
                         <input
                           type="text"
-                          value={alunoEditado.contrato}
-                          onChange={(e) => setAlunoEditado({ ...alunoEditado, contrato: e.target.value })}
+                          value={alunoEditado.faixa_atual}
+                          onChange={(e) => setAlunoEditado({ ...alunoEditado, faixa_atual: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        />
+                      </td>
+                      <td className="py-2 px-4">
+                        <input
+                          type="text"
+                          value={alunoEditado.matricula}
+                          onChange={(e) => setAlunoEditado({ ...alunoEditado, matricula: e.target.value })}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                         />
                       </td>
                       <td className="py-3 px-4 flex gap-2">
                         <button
-                          className="bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center mr-3"
+                          className="bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center"
                           onClick={() => salvarEdicao(aluno.id)}
                         >
-                           <Save size={18} className="" /> 
-                          
+                          <Save size={18} /> 
                         </button>
                         <button
                           className="bg-gray-500 text-white py-2 px-4 rounded-lg"
                           onClick={() => setEditandoId(null)}
                         >
-                           <XCircle size={18} className="" /> 
-                          
+                          <XCircle size={18} /> 
                         </button>
                       </td>
                     </>
@@ -128,25 +141,34 @@ function ListaAlunos() {
                       <td className="py-2 px-4">{aluno.id}</td>
                       <td className="py-2 px-4">{aluno.nome}</td>
                       <td className="py-2 px-4">{aluno.email}</td>
-                      <td className="py-2 px-4">{aluno.telefone}</td>
-                      <td className="py-2 px-4">{aluno.contrato}</td>
+                      {/* Telefone com ícone de WhatsApp */}
+                      <td className="py-2 px-4 flex items-center gap-2">
+                        <span>{aluno.telefone}</span>
+                        <a
+                          href={`https://wa.me/${aluno.telefone}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FaWhatsapp size={18} className="text-green-500" />
+                        </a>
+                      </td>
+                      <td className="py-2 px-4">{aluno.faixa_atual}</td>
+                      <td className="py-2 px-4">{aluno.matricula}</td>
                       <td className="py-2 px-4 flex gap-2">
                         <button
-                          className="bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center mr-3"
+                          className="bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center"
                           onClick={() => {
                             setEditandoId(aluno.id);
                             setAlunoEditado(aluno);
                           }}
                         >
-                          <Pencil size={18} className="" /> 
-                          
+                          <Pencil size={18} /> 
                         </button>
                         <button
                           className="bg-red-500 text-white py-1 px-4 rounded-lg"
                           onClick={() => excluirAluno(aluno.id)}
                         >
-                          <Trash size={18} className="" /> 
-                          
+                          <Trash size={18} /> 
                         </button>
                       </td>
                     </>

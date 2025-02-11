@@ -72,6 +72,7 @@ function Presencas() {
       .then(() => {
         alert("Presença registrada com sucesso!");
   
+        
         // Limpar os dados do estado após o sucesso
         setNovoPresenca({
           aluno_id: "",
@@ -98,17 +99,17 @@ function Presencas() {
         {/* Campo de busca/seleção do aluno */}
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nome do Aluno
+            
           </label>
           <input
             type="text"
             value={search}
             onChange={handleSearchChange}
             placeholder="Digite para filtrar"
-            className="w-full px-4 py-2 border border-gray-300 rounded"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
           />
           {filtrados.length > 0 && search && (
-            <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0">
+            <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0 ">
               {filtrados.map((aluno) => (
                 <li
                   key={aluno.id}
@@ -124,8 +125,8 @@ function Presencas() {
 
         {/* Campo de data */}
         <div className="mb-3">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Data
+          <label className="block text-sm font-medium text-gray-700 mb-1 ">
+        
           </label>
           <input
             type="date"
@@ -134,7 +135,7 @@ function Presencas() {
               setNovoPresenca({ ...novoPresenca, data_checkin: e.target.value })
             }
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded"
+            className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
           />
         </div>
 

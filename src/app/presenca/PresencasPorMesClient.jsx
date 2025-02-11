@@ -6,7 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Header from '../componetes/Header/Header';
 import Footer from '../componetes/Footer/Footer';
-import { Pencil, Trash, Save, XCircle } from 'lucide-react';  
+import { Pencil, Trash, Save, XCircle } from 'lucide-react';
 
 function PresencasPorMesClient() {
     const searchParams = useSearchParams();
@@ -100,7 +100,7 @@ function PresencasPorMesClient() {
         <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-grow container mx-auto my-4 p-4">
-            <h2 className="text-2xl font-bold mb-4">Presenças do Aluno {formatarNome(alunoNome)}</h2>
+                <h2 className="text-2xl font-bold mb-4">Presenças do Aluno {formatarNome(alunoNome)}</h2>
 
                 {/* Seletor de Mês e Ano */}
                 <div className="my-4 flex items-center space-x-2">
@@ -121,7 +121,7 @@ function PresencasPorMesClient() {
                             <tr>
                                 <th className="py-2 px-4 border">Data</th>
                                 <th className="py-2 px-4 border">Nome</th>
-                                <th className="py-2 px-4 border">Ações</th>
+                                <th className="py-2 px-4 border"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -136,7 +136,8 @@ function PresencasPorMesClient() {
                                                 className="border border-gray-300 rounded px-2 py-1 w-32"
                                             />
                                         ) : (
-                                            new Date(p.data_checkin).toLocaleDateString("pt-BR")
+                                            new Date(`${p.data_checkin}T00:00:00`).toLocaleDateString("pt-BR")
+
                                         )}
                                     </td>
                                     <td className="py-2 px-4 border">{p.nome_aluno}</td>
@@ -147,15 +148,15 @@ function PresencasPorMesClient() {
                                                     onClick={() => handleSalvarEdicao(p.id)}
                                                     className="bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center mr-3"
                                                 >
-                                                     <Save size={18} className="" /> 
-                                                 
+                                                    <Save size={18} className="" />
+
                                                 </button>
                                                 <button
                                                     onClick={() => setEditando(null)}
                                                     className="bg-gray-500 text-white py-2 px-4 rounded-lg"
                                                 >
-                                                    <XCircle size={18} className="" /> 
-                                                    
+                                                    <XCircle size={18} className="" />
+
                                                 </button>
                                             </div>
                                         ) : (
@@ -164,15 +165,15 @@ function PresencasPorMesClient() {
                                                     onClick={() => handleEditar(p.id, p.data_checkin)}
                                                     className="bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center mr-3"
                                                 >
-                                                     <Pencil size={18} className="" /> 
-                                                    
+                                                    <Pencil size={18} className="" />
+
                                                 </button>
                                                 <button
                                                     onClick={() => handleExcluir(p.id)}
                                                     className="bg-red-500 text-white py-1 px-4 rounded-lg"
                                                 >
-                                                     <Trash size={18} className="" /> 
-                                                    
+                                                    <Trash size={18} className="" />
+
                                                 </button>
                                             </div>
                                         )}
