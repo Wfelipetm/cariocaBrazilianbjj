@@ -21,24 +21,37 @@ function PresencasPorMesClient() {
 
     useEffect(() => {
         if (alunoId) {
+            console.log("Buscando dados do aluno com ID:", alunoId);
+
             // Primeiro, buscar os dados do aluno
-            fetch(`http://localhost:3000/alunos/${alunoId}`)
+            fetch(`http://10.200.200.62:5001/alunos/${alunoId}`)
                 .then((response) => response.json())
                 .then((data) => {
+                    console.log("Dados do aluno recebidos:", data);
                     setAlunoNome(data.nome);  // Armazenar o nome do aluno no estado
                 })
-                .catch((err) => console.error("Erro ao buscar aluno:", err));
+                .catch((err) => {
+                    console.error("Erro ao buscar aluno:", err);
+                });
 
             const mes = String(dataSelecionada.getMonth() + 1).padStart(2, "0");
             const ano = dataSelecionada.getFullYear();
 
+            console.log("Buscando presenças para o mês:", mes, "ano:", ano);
+
             // Requisição para buscar as presenças do aluno filtradas por mês e ano
-            fetch(`http://localhost:3000/presencas/${alunoId}/mes?mes=${mes}&ano=${ano}`)
+            fetch(`http://10.200.200.62:5001/presencas/${alunoId}/mes?mes=${mes}&ano=${ano}`)
                 .then((response) => response.json())
-                .then((data) => setPresencas(data))
-                .catch((err) => console.error("Erro ao buscar presenças:", err));
+                .then((data) => {
+                    console.log("Presenças recebidas:", data);
+                    setPresencas(data);
+                })
+                .catch((err) => {
+                    console.error("Erro ao buscar presenças:", err);
+                });
         }
     }, [alunoId, dataSelecionada]);
+
 
     // Função para formatar nome
     function formatarNome(nomeCompleto) {
@@ -54,8 +67,18 @@ function PresencasPorMesClient() {
 
     const handleEditar = (id, dataCheckin) => {
         setEditando(id);
-        setNovaData(new Date(dataCheckin));
+
+        // Convertendo data de volta para o formato "dd/MM/yyyy" para exibição
+        const [day, month, year] = dataCheckin.split('/');
+        const novaDataFormatada = new Date(`${year}-${month}-${day}`);
+
+        if (novaDataFormatada instanceof Date && !isNaN(novaDataFormatada)) {
+            setNovaData(novaDataFormatada);
+        } else {
+            console.error('Data inválida:', dataCheckin);
+        }
     };
+
 
     const handleSalvarEdicao = (id) => {
         // Formatação da data para o formato "YYYY-MM-DD"
@@ -63,12 +86,12 @@ function PresencasPorMesClient() {
             novaData.getMonth() + 1
         ).padStart(2, "0")}-${String(novaData.getDate()).padStart(2, "0")}`;
 
-        fetch(`http://localhost:3000/presencas/${id}`, {
+        fetch(`http://10.200.200.62:5001/presencas/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 aluno_id: alunoId,
-                data_presenca: dataPresenca,
+                data_checkin: dataPresenca,
             }),
         })
             .then((response) => response.json())
@@ -85,7 +108,7 @@ function PresencasPorMesClient() {
     };
 
     const handleExcluir = (id) => {
-        fetch(`http://localhost:3000/presencas/${id}`, {
+        fetch(`http://10.200.200.62:5001/presencas/${id}`, {
             method: "DELETE",
         })
             .then((response) => response.json())
@@ -125,8 +148,8 @@ function PresencasPorMesClient() {
                             </tr>
                         </thead>
                         <tbody>
-                            {presencas.map((p) => (
-                                <tr key={p.id} className="border-b">
+                            {presencas.map((p, index) => (
+                                <tr key={index} className="border-b">
                                     <td className="py-2 px-4 border">
                                         {editando === p.id ? (
                                             <DatePicker
@@ -136,7 +159,7 @@ function PresencasPorMesClient() {
                                                 className="border border-gray-300 rounded px-2 py-1 w-32"
                                             />
                                         ) : (
-                                            new Date(`${p.data_checkin}T00:00:00`).toLocaleDateString("pt-BR")
+                                            new Date(`${p.data_checkin.split('/').reverse().join('-')}T00:00:00`).toLocaleDateString("pt-BR")
 
                                         )}
                                     </td>

@@ -17,7 +17,7 @@ export default function Produto() {
   // Fetch de produtos
   useEffect(() => {
     const fetchProdutos = async () => {
-      const res = await fetch('http://localhost:3000/produtos/');
+      const res = await fetch('http://10.200.200.62:5001/produtos/');
       const data = await res.json();
       setProdutos(data);
     };
@@ -35,7 +35,7 @@ export default function Produto() {
     formData.append("estoque", novoProduto.estoque);
     if (novoProduto.foto) formData.append("foto", novoProduto.foto);
 
-    const res = await fetch('http://localhost:3000/produtos', {
+    const res = await fetch('http://10.200.200.62:5001/produtos', {
       method: 'POST',
       body: formData,
     });

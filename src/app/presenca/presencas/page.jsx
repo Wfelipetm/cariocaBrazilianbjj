@@ -18,7 +18,7 @@ function Presencas() {
 
   useEffect(() => {
     // Carregar a lista de alunos
-    fetch("http://localhost:3000/alunos")
+    fetch("http://10.200.200.62:5001/alunos/")
       .then((response) => response.json())
       .then((data) => {
         setAlunos(data);
@@ -49,7 +49,7 @@ function Presencas() {
   const handleAlunoSelect = (aluno) => {
     setNovoPresenca({
       ...novoPresenca,
-      aluno_id: aluno.id,
+      aluno_id: aluno.aluno_id,
       nome_aluno: aluno.nome
     });
     setSearch(aluno.nome); // Atualiza o campo de busca com o nome do aluno selecionado
@@ -60,7 +60,7 @@ function Presencas() {
     e.preventDefault();
   
     // Requisição POST para registrar a presença
-    fetch("http://localhost:3000/presencas", {
+    fetch("http://10.200.200.62:5001/presencas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -112,7 +112,7 @@ function Presencas() {
             <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0 ">
               {filtrados.map((aluno) => (
                 <li
-                  key={aluno.id}
+                  key={aluno.aluno_id}
                   className="p-2 cursor-pointer hover:bg-gray-100"
                   onClick={() => handleAlunoSelect(aluno)}
                 >

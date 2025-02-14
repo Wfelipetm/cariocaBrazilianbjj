@@ -47,20 +47,32 @@ function Graduacao() {
   const semanasPorAno = 52; // Número de semanas por ano
 
   useEffect(() => {
-    fetch("http://localhost:3000/alunos")
-      .then((response) => response.json())
+    // Carregar alunos
+    fetch("http://10.200.200.62:5001/alunos/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erro ao carregar alunos: " + response.statusText);
+        }
+        return response.json();
+      })
       .then((data) => {
         setAlunos(data);
         setFiltrados(data);
       })
-      .catch((err) => console.error("Erro ao carregar alunos:", err));
-
-    fetch("http://localhost:3000/graduacoes/")
-      .then((response) => response.json())
+      .catch((err) => console.error(err));
+  
+    // Carregar graduações
+    fetch("http://10.200.200.62:5001/graduacoes/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erro ao carregar graduações: " + response.statusText);
+        }
+        return response.json();
+      })
       .then((data) => setGraduacoes(data))
-      .catch((err) => console.error("Erro ao carregar graduações:", err));
+      .catch((err) => console.error(err));
   }, []);
-
+  
   useEffect(() => {
     // Atualiza o próximo nível baseado no nível atual do aluno
     if (novoGraduacao.nivel_atual) {
@@ -97,7 +109,7 @@ function Graduacao() {
   const handleAlunoSelect = (aluno) => {
     setNovoGraduacao({
       ...novoGraduacao,
-      aluno_id: aluno.id,
+      aluno_id: aluno.aluno_id,
       nome_aluno: aluno.nome,
       nivel_atual: aluno.faixa_atual || ""
     });
@@ -105,7 +117,7 @@ function Graduacao() {
     setSearch(aluno.nome);
     setFiltrados([]);
 
-    fetch(`http://localhost:3000/presencas/${aluno.id}/mes?mes=02&ano=2025`)
+    fetch(`http://10.200.200.62:5001/presencas/${aluno.aluno_id}/mes?mes=02&ano=2025`)
       .then((response) => response.json())
       .then((data) => {
         const totalAulas = Array.isArray(data) ? data.length : 0;
@@ -120,7 +132,7 @@ function Graduacao() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("http://localhost:3000/graduacoes/", {
+    fetch("http://10.200.200.62:5001/graduacoes/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -178,7 +190,7 @@ function Graduacao() {
               <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0 ">
                 {filtrados.map((aluno) => (
                   <li
-                    key={aluno.id}
+                    key={aluno.aluno_id}
                     className="p-2 cursor-pointer hover:bg-gray-100"
                     onClick={() => handleAlunoSelect(aluno)}
                   >
