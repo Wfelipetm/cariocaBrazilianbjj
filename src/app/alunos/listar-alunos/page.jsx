@@ -121,7 +121,7 @@ function ListaAlunos() {
                             type="text"
                             value={alunoEditado.faixa_atual}
                             onChange={(e) => setAlunoEditado({ ...alunoEditado, faixa_atual: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg "
                           />
                         </td>
                         <td className="py-2 px-4">

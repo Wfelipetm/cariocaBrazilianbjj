@@ -5,6 +5,8 @@ import { AuthContext } from "./context/AuthProvider";
 import { useRouter } from "next/navigation";
 import Header from "./componetes/Header/Header";
 import Footer from "./componetes/Footer/Footer";
+import Home from "./home/page"
+
 
 export default function Page() {
   const { user } = useContext(AuthContext);
@@ -12,21 +14,18 @@ export default function Page() {
 
   useEffect(() => {
     if (!user) {
-      router.push("/login"); // Redireciona para o login se não estiver autenticado
+      router.push("/login");
     }
   }, [user, router]);
 
   if (!user) {
-    return null; 
+    return null;
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col justify-between w-screen h-screen">
       <Header />
-      <main className="flex-grow p-8 text-center">
-        <h2 className="text-xl">Bem-vindo ao Carioca Brazilian!</h2>
-        <p className="mt-4 text-gray-700">Aproveite a experiência com a gente.</p>
-      </main>
+      <Home />
       <Footer />
     </div>
   );

@@ -60,7 +60,8 @@ export default function Produto() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container mx-auto my-4 p-4">
-        <h2 className="text-2xl font-bold mb-4">Adicionar Novo Produto</h2>
+        <h2 className="text-2xl text-center font-bold mb-4">Adicionar Novo Produto</h2>
+        <div className="max-w-md mx-auto">
 
         {/* Formulário para inserir novo produto */}
         <form onSubmit={adicionarProduto} className="space-y-4">
@@ -120,7 +121,7 @@ export default function Produto() {
               <span className="text-gray-500">Escolher arquivo</span>
               <button
                 type="button"
-                className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onClick={() => document.querySelector('input[type="file"]').click()}
               >
                 Upload
@@ -128,18 +129,19 @@ export default function Produto() {
             </div>
           </div>
           <div className="mt-6 flex space-x-4">
-            <button type="submit" className="w-40 py-3 bg-blue-500 text-white rounded-lg">
+            <button type="submit" className="w-40 py-3 bg-blue-500 text-white rounded">
               Adicionar Produto
             </button>
 
             {/* Botão para ver produtos */}
             <Link href="/produtos/loja-produto" passHref>
-              <button className="w-40 py-3 bg-gray-500 text-white rounded-lg">
+              <button className="w-40 py-3 bg-gray-500 text-white rounded">
                 Ver Produtos
               </button>
             </Link>
           </div>
         </form>
+        </div>
       </main>
       <Footer />
     </div>

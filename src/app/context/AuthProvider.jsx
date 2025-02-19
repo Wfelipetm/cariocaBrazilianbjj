@@ -9,6 +9,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const router = useRouter();
+  useEffect(() => {
+    console.log("Token após atualização no contexto:", token);
+  }, [token]); // Vai ser disparado quando o token for atualizado
+
+  
+
 
   useEffect(() => {
     try {
@@ -16,8 +22,9 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem("token");
   
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));  // Apenas tenta analisar se o valor não for nulo
+        setUser(JSON.parse(storedUser));
         setToken(storedToken);
+        console.log("token carregado do localStorage", storedToken); // Verifique se o token está correto aqui
       }
     } catch (error) {
       console.error("Erro ao carregar os dados do usuário:", error.message);
@@ -40,17 +47,22 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       console.log("Dados recebidos da API:", data);
   
-      if (response.ok) {
-        setUser(data.usuario);  // Aqui ajustamos para 'data.usuario' em vez de 'data.user'
-        setToken(data.token);
-        localStorage.setItem("user", JSON.stringify(data.usuario));  // Alterado para 'usuario'
-        localStorage.setItem("token", data.token);
-        router.push("/"); // Redireciona após login bem-sucedido
-      } else {
+      if (!response.ok) {
         throw new Error(data.error || "Erro ao fazer login");
       }
+  
+      // Atualiza estados e localStorage corretamente
+      const usuario = { ...data.usuario, role: data.usuario.role || "usuario" };
+      setUser(usuario);
+      setToken(data.token);
+      localStorage.setItem("user", JSON.stringify(usuario));
+      localStorage.setItem("token", data.token);
+  
+      console.log("token após login", data.token); // Verifique o token após o login
+      return data;
     } catch (error) {
       console.error("Erro no login:", error.message);
+      throw error;
     }
   };
   
@@ -66,7 +78,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        await login(email, senha); // Faz login automaticamente após registro
+        await login(email, senha);
       } else {
         throw new Error(data.error || "Erro ao registrar");
       }
@@ -80,6 +92,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    router.push("/"); // Redireciona para a home
   };
 
   return (

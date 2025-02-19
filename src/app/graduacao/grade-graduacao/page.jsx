@@ -174,7 +174,8 @@ function Graduacao() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container mx-auto my-4 p-4">
-        <h2 className="text-2xl font-bold mb-4">Registrar Graduação</h2>
+        <h2 className="text-2xl text-center font-bold mb-4">Registrar Graduação</h2>
+        <div className="max-w-md mx-auto">
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="mb-3">
@@ -280,6 +281,7 @@ function Graduacao() {
             </button> */}
           </div>
         </form>
+        </div>
       </main>
       <Footer />
     </div>
