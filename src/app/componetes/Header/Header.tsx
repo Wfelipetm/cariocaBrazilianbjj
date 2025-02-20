@@ -33,8 +33,9 @@ function Header() {
   return (
     <header className="bg-gray-900 w-full text-white shadow-md py-4">
       <nav className="flex items-center justify-between px-8">
+        {/* Logo no canto esquerdo */}
         <Link href="/" className="flex items-center">
-          <div className="w-20 h-20 lg:w-24" />
+        <img src="/cariocabjjBranco.png" alt="Logo Carioca BJJ" className="w-20 h-20 lg:w-20 ml-3" />
         </Link>
 
         {/* Exibe o botão de hambúrguer apenas se o usuário for admin */}

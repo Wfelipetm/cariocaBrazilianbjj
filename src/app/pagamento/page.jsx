@@ -1,8 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../context/AuthProvider";
 
 export default function Pagamento() {
+  const { user } = useContext(AuthContext); // Obtendo usuário do contexto
+  const [amount, setAmount] = useState(""); // Estado para o valor do pagamento
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [qrCode, setQrCode] = useState(null);
@@ -10,6 +13,11 @@ export default function Pagamento() {
   const [copied, setCopied] = useState(false);
 
   const handlePagamento = async () => {
+    if (!amount || isNaN(parseFloat(amount))) {
+      setError("Digite um valor válido para o pagamento.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setQrCode(null);
@@ -18,11 +26,11 @@ export default function Pagamento() {
 
     try {
       const response = await axios.post("http://10.200.200.62:5001/api/payment/create-payment", { 
-        transaction_amount: 30.50,
-        description: "Teste api pix V2",
+        transaction_amount: parseFloat(amount),
+        description: "Pagamento via PIX",
         payment_method_id: "pix",
         payer: {
-          email: "wfelipetm@gmail.com"
+          email: user?.email || "email@padrao.com" // Usa o email do usuário ou um padrão
         }
       });
 
@@ -46,10 +54,20 @@ export default function Pagamento() {
   };
 
   return (
-    <section className="h-full w-full lg:ml-[600px] sm:ml-32">
-      <h2 className="text-xl font-bold">Seção Pagamento</h2>
-      <p className="mt-2">Escaneie o QR Code ou copie o código PIX para pagar.</p>
-      
+    <section className="flex flex-col items-center justify-center h-full p-4 lg:ml-[100px] sm:ml-[100px]">
+      <h2 className="text-xl h-20 font-bold">Seção Pagamento</h2>
+     
+
+      {/* Input para definir o valor do pagamento */}
+    <div  className="flex items-center gap-4 mt-4">
+    <input 
+        type="number"
+        placeholder="Digite o valor (R$)"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        className="mt-4 p-2 border rounded w-auto"
+      />
+
       <button 
         onClick={handlePagamento} 
         disabled={loading}
@@ -57,6 +75,7 @@ export default function Pagamento() {
       >
         {loading ? "Processando..." : "Gerar QR Code PIX"}
       </button>
+    </div>
 
       {qrCode && (
         <div className="mt-4 flex flex-col items-center">

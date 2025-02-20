@@ -9,7 +9,7 @@ export default function Calendario({ paidMonth }) {
   ];
 
   return (
-    <section className="h-full w-full flex flex-col items-center lg:ml-28 sm:ml-5">
+    <section className="flex flex-col items-center justify-center h-full p-4 lg:ml-[200px] sm:ml-[100px]">
       <h2 className="text-xl font-bold mb-4">Calendário de Pagamento</h2>
 
       {/* Grid responsiva */}

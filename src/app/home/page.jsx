@@ -26,7 +26,7 @@ export default function Home() {
     {activeSection === "pagamento" && <Pagamento />}
 
     {!activeSection && (
-        <div className="text-center">
+        <div className="flex flex-col items-center justify-center h-full p-4 lg:ml-[-100px] sm:ml-[100px]">
             <h2 className="text-xl font-bold">Bem-vindo!</h2>
             <p>Clique em um dos ícones para exibir uma seção.</p>
         </div>
