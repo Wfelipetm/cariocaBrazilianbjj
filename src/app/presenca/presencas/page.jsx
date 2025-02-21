@@ -16,11 +16,14 @@ function Presencas() {
   const [search, setSearch] = useState(""); // Valor do campo de busca
   const router = useRouter();
 
+
+
   useEffect(() => {
     // Carregar a lista de alunos
     fetch("http://10.200.200.62:5001/alunos/")
       .then((response) => response.json())
       .then((data) => {
+        
         setAlunos(data);
         setFiltrados(data); // Inicialmente, todos os alunos são visíveis
       })
@@ -34,13 +37,16 @@ function Presencas() {
     }));
   }, []);
 
+
+
+
   const handleSearchChange = (e) => {
     const valorBusca = e.target.value;
     setSearch(valorBusca);
 
     // Filtra os alunos que começam com a letra digitada
-    const pontosFiltrados = pontos.filter((ponto) =>
-      ponto.nome.toLowerCase().startsWith(valorBusca.toLowerCase())
+    const alunosFiltrados = alunos.filter((aluno) =>
+      aluno.nome.toLowerCase().startsWith(valorBusca.toLowerCase())
     );
 
     setFiltrados(alunosFiltrados); // Atualiza os alunos filtrados
