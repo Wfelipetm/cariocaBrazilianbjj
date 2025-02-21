@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
-import Header from "../componetes/Header/Header";  // Ajuste o caminho conforme sua estrutura
+import Header from "../componetes/Header/Header";
 import Footer from "../componetes/Footer/Footer";
+import { AuthContext } from "../context/AuthProvider";
 
 function Alunos() {
+  const { user, token } = useContext(AuthContext);  // Aqui já pega o token do contexto
+  const router = useRouter();
+    const [nomes, setNomes] = useState([]); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [filtrados, setFiltrados] = useState([]);
+  const [usuarios, setUsuarios] = useState([]); // Estado para armazenar os nomes dos usuários
   const [novoAluno, setNovoAluno] = useState({
     nome: "",
     email: "",
@@ -14,41 +23,65 @@ function Alunos() {
     faixa_atual: "",
     data_pagamento: "",
     professor: "",
-    turma: ""
+    turma: "",
+    userId: user?.id || "",
   });
-  console.log(JSON.stringify(novoAluno, null, 2));
+
 
 
   useEffect(() => {
-    // Obtém a data atual e o mês seguinte
-    const hoje = new Date();
-    hoje.setMonth(hoje.getMonth() + 1); // Define o mês seguinte
+    if (!token) return;
 
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // Adiciona 0 à esquerda se o mês for único
-    const dia = String(hoje.getDate()).padStart(2, '0'); // Adiciona 0 à esquerda se o dia for único
+    fetch("http://10.200.200.62:5001/auth/users", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Dados recebidos:", data);
+        setNomes(data);
+        setFiltrados(data);
+      })
 
-    const dataFormatada = `${ano}-${mes}-${dia}`;
 
-    setNovoAluno((prevState) => ({
-      ...prevState,
-      data_pagamento: dataFormatada, // Atualiza a data_pagamento
-    }));
-  }, []);
+      .catch((err) => console.error("Erro ao buscar usuários:", err));
 
-  const router = useRouter();
-  // Função para gerar um número de matrícula com 5 dígitos
-  const gerarMatricula = () => {
-    return Math.floor(10000 + Math.random() * 90000); // Gera um número entre 10000 e 99999
+
+  }, [token]);
+  
+
+
+
+  const handleSearchChange = (e) => {
+    const valorBusca = e.target.value || '';
+    setSearch(valorBusca);
+  
+    // Filtra os dados com base no termo de busca
+    const nomesFiltrados = nomes.filter((usuario) =>
+      usuario.nome.toLowerCase().startsWith(valorBusca.toLowerCase())
+    );
+  
+    setFiltrados(nomesFiltrados); // Atualiza o estado de filtrados
   };
+  
 
-  useEffect(() => {
-    // Preencher a matrícula automaticamente quando o componente for montado
-    setNovoAluno((prevState) => ({
-      ...prevState,
-      matricula: gerarMatricula() // Atribui o número de matrícula gerado
-    }));
-  }, []);
+
+  
+
+  // Seleção de um usuário
+  const handleUserSelect = (usuario) => {
+    setNovoAluno({
+      ...novoAluno,
+      nome: usuario.nome,  // Atualiza com o nome do usuário selecionado
+      usuarioId: usuario.id_usuario,  // Define o id do usuário selecionado
+    });
+    setSearch(usuario.nome);  // Atualiza o campo de busca com o nome do usuário
+    setFiltrados([]);  // Limpa a lista de filtrados após a seleção
+  };
+  
 
 
   const handleSubmit = (e) => {
@@ -58,25 +91,14 @@ function Alunos() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(novoAluno),
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
-        // Limpa o formulário após o sucesso
-        setNovoAluno({
-          nome: "",
-          email: "",
-          telefone: "",
-          matricula: "",
-          faixa_atual: "",
-          data_pagamento: "",
-          professor: "",
-          turma: "",
-        });
-
-        // Redireciona para a página de lista de alunos
-        router.push("/alunos/listar-alunos");
+        console.log("Aluno criado:", data);
       })
-      .catch((err) => console.error("Erro ao adicionar aluno:", err));
+      .catch((err) => console.error("Erro ao criar aluno:", err));
   };
+
+
 
 
   return (
@@ -87,19 +109,31 @@ function Alunos() {
         <h2 className="text-2xl text-center mb-5 font-semibold">Adicionar Novo Aluno</h2>
         <div className="max-w-md mx-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+            <div className="mb-3">
+
               <input
                 type="text"
-                placeholder="Nome"
-                value={novoAluno.nome}
-                onChange={(e) =>
-                  setNovoAluno({ ...novoAluno, nome: e.target.value })
-                }
-                required
+                value={search}
+                onChange={handleSearchChange}
+                placeholder="Digite para filtrar"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-
               />
+             {filtrados.length > 0 && search && (
+  <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0">
+    {filtrados.map((usuario) => (
+      <li
+        key={usuario.id_usuario} // Usando id_usuario como chave
+        className="p-2 cursor-pointer hover:bg-gray-100"
+        onClick={() => handleUserSelect(usuario)} // Passando o objeto inteiro do usuário
+      >
+        {usuario.nome} {/* Exibindo o nome do usuário */}
+      </li>
+    ))}
+  </ul>
+)}
+
             </div>
+
             <div>
               <input
                 type="email"

@@ -39,8 +39,8 @@ function Presencas() {
     setSearch(valorBusca);
 
     // Filtra os alunos que começam com a letra digitada
-    const alunosFiltrados = alunos.filter((aluno) =>
-      aluno.nome.toLowerCase().startsWith(valorBusca.toLowerCase())
+    const pontosFiltrados = pontos.filter((ponto) =>
+      ponto.nome.toLowerCase().startsWith(valorBusca.toLowerCase())
     );
 
     setFiltrados(alunosFiltrados); // Atualiza os alunos filtrados

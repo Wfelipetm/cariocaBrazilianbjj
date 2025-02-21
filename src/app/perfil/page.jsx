@@ -1,9 +1,9 @@
 "use client";
 import { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../context/AuthProvider";
+import { AuthContext } from "../context/AuthProvider"; // Verifique o caminho correto para o contexto
 
-export default function Perfil({ onLogout }) {
-  const { user } = useContext(AuthContext);
+export default function Perfil() {
+  const { user, logout } = useContext(AuthContext); // Consome o logout do contexto
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
 
@@ -78,7 +78,7 @@ export default function Perfil({ onLogout }) {
           </button>
           <button
             type="button"
-            onClick={onLogout}
+            onClick={logout} // Chama a função logout do contexto diretamente
             className="flex-1 py-2 bg-red-500 text-white rounded"
           >
             Sair
