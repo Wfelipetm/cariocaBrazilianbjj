@@ -53,13 +53,16 @@ function PresencasPorMesClient() {
     }, [alunoId, dataSelecionada]);
 
 
-    // Função para formatar nome
     function formatarNome(nomeCompleto) {
+        if (!nomeCompleto) {
+            return "";  // Retorna uma string vazia caso o nome esteja indefinido
+        }
         const partes = nomeCompleto.split(" ");
         const primeiroNome = partes[0];
         const ultimoSobrenome = partes[partes.length - 1];
         return `${primeiroNome} ${ultimoSobrenome}`;
     }
+    
 
     const handleDateChange = (date) => {
         setDataSelecionada(date);

@@ -7,7 +7,7 @@ export default function Calendario() {
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
-  const mensalidade = 150; // Valor da mensalidade
+  const mensalidade = 150;
   const [statusPagamentos, setStatusPagamentos] = useState(Array(12).fill(false));
 
   const handleTogglePagamento = (index) => {
@@ -24,13 +24,13 @@ export default function Calendario() {
 
       {/* Grid responsiva com fundo cinza e scroll horizontal sem barra visível */}
       <div className="overflow-x-auto w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4  p-4 rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 rounded-lg">
           {months.map((month, index) => (
             <div
               key={index}
-              className={`flex flex-col items-start justify-between rounded-lg transition-all duration-300 
-                h-48 w-full p-4
-                ${statusPagamentos[index] ? "bg-green-200 text-green-800" : "bg-red-100 text-red-800"}`}
+              className={`flex flex-col items-start justify-between rounded-lg transition-all duration-300
+                ${statusPagamentos[index] ? "bg-green-200 text-green-800" : "bg-red-100 text-red-800"}
+                overflow-hidden h-auto sm:h-[200px] md:h-[220px] lg:h-[250px] w-full p-4`}
             >
               <h1 className="text-lg font-semibold mb-1 ml-[29px]">{month}</h1>
 
@@ -41,13 +41,13 @@ export default function Calendario() {
                   <FaCalendarAlt size={54} />
                 </div>
 
-                {/* Segunda coluna: informações (div preta que você quer aumentar e centralizar) */}
-                <div className="flex flex-col justify-center items-center m-4 p-4 mt-auto pb-1 h-[95%] w-[85%] ml-1 bg-gray-300  rounded-lg">
+                {/* Segunda coluna: informações */}
+                <div className="flex flex-col justify-center items-center m-4 p-4 mt-auto pb-1 h-[95%] w-[85%] ml-1 bg-gray-300 rounded-lg">
                   {/* Valor com margem inferior para o espaçamento e negrito */}
                   <p className="text-xl font-bold text-left ml-24 mb-4">{`R$ ${mensalidade},00`}</p>
 
                   {/* Texto de Pago/Pendente com caixa alta, espaçamento e negrito */}
-                  <p className="flex items-center gap-2 text-sm  text-center uppercase font-bold">
+                  <p className="flex items-center gap-2 text-sm text-center uppercase font-bold">
                     {statusPagamentos[index] ? (
                       <>
                         <FaCheckCircle className="text-green-600 ml-24" />
@@ -61,21 +61,18 @@ export default function Calendario() {
                     )}
                   </p>
                 </div>
-
               </div>
 
-              <div className="ml-[215px]"> {/* Ajuste o valor da margem manualmente */}
+              <div className="ml-[215px]">
                 <button
                   className={`px-6 py-2 mt-1 text-xs text-white rounded-md transition-all duration-300
-        bg-blue-600 hover:bg-blue-500 hover:scale-105 active:scale-95 
-        ${statusPagamentos[index] ? "ml-[19px]" : "ml-[-px]"}`}
+                    bg-blue-600 hover:bg-blue-500 hover:scale-105 active:scale-95
+                    ${statusPagamentos[index] ? "ml-[19px]" : "ml-[-px]"}`}
                   onClick={() => handleTogglePagamento(index)}
                 >
                   {statusPagamentos[index] ? "Desfazer" : "Pagar com Pix"}
                 </button>
               </div>
-
-
             </div>
           ))}
         </div>

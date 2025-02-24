@@ -50,6 +50,11 @@ function Header() {
             <div className="min-h-full p-6" style={{ backgroundColor: "#0A0E17" }}>
               {isAdmin && (
                 <ul className="space-y-6">
+                   <li>
+                    <Link href="/professores/professores" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
+                      Professores
+                    </Link>
+                  </li>
                   <li>
                     <Link href="/alunos" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
                       Alunos
@@ -65,11 +70,7 @@ function Header() {
                       Graduação
                     </Link>
                   </li>
-                  <li>
-                    <Link href="/professores/professores" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
-                      Professores
-                    </Link>
-                  </li>
+                 
                   <li>
                     <Link href="/produtos/produto" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
                       Produtos
@@ -84,6 +85,11 @@ function Header() {
         <ul className="hidden lg:flex lg:space-x-6 text-lg">
           {isAdmin && (
             <>
+                <li>
+                <Link href="/professores/professores" className="text-white hover:text-gray-400">
+                  Professores
+                </Link>
+              </li>
               <li>
                 <Link href="/alunos" className="text-white hover:text-gray-400">
                   Alunos
@@ -104,11 +110,7 @@ function Header() {
                   Produtos
                 </Link>
               </li>
-              <li>
-                <Link href="/professores/professores" className="text-white hover:text-gray-400">
-                  Professores
-                </Link>
-              </li>
+          
             </>
           )}
         </ul>

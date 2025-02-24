@@ -5,26 +5,31 @@ import { useRouter } from "next/navigation";
 import Header from "../componetes/Header/Header";
 import Footer from "../componetes/Footer/Footer";
 import { AuthContext } from "../context/AuthProvider";
+import axios from "axios";
 
 function Alunos() {
   const { user, token } = useContext(AuthContext);  // Aqui já pega o token do contexto
   const router = useRouter();
-    const [nomes, setNomes] = useState([]); 
+  const [nomes, setNomes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [search, setSearch] = useState('');
   const [filtrados, setFiltrados] = useState([]);
-  const [usuarios, setUsuarios] = useState([]); // Estado para armazenar os nomes dos usuários
+  const [usuarios, setUsuarios] = useState([]);
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState(false);
+  const [professores, setProfessores] = useState([]);
+
   const [novoAluno, setNovoAluno] = useState({
     nome: "",
     email: "",
     telefone: "",
-    matricula: "",
+
     faixa_atual: "",
     data_pagamento: "",
     professor: "",
     turma: "",
-    userId: user?.id || "",
+    valor: "",
+    userId: user?.id || "",  // Corrigido para `userId`
   });
 
 
@@ -45,61 +50,106 @@ function Alunos() {
         setNomes(data);
         setFiltrados(data);
       })
-
-
       .catch((err) => console.error("Erro ao buscar usuários:", err));
-
-
   }, [token]);
-  
+
 
 
 
   const handleSearchChange = (e) => {
     const valorBusca = e.target.value || '';
     setSearch(valorBusca);
-  
-    // Filtra os dados com base no termo de busca
+
+    if (valorBusca === '') {
+      setFiltrados([]);
+      return;
+    }
+
     const nomesFiltrados = nomes.filter((usuario) =>
-      usuario.nome.toLowerCase().startsWith(valorBusca.toLowerCase())
+      usuario.nome.toLowerCase().includes(valorBusca.toLowerCase())
     );
-  
-    setFiltrados(nomesFiltrados); // Atualiza o estado de filtrados
+
+    setFiltrados(nomesFiltrados);
   };
-  
 
 
-  
 
-  // Seleção de um usuário
-  const handleUserSelect = (usuario) => {
-    setNovoAluno({
-      ...novoAluno,
-      nome: usuario.nome,  // Atualiza com o nome do usuário selecionado
-      usuarioId: usuario.id_usuario,  // Define o id do usuário selecionado
-    });
-    setSearch(usuario.nome);  // Atualiza o campo de busca com o nome do usuário
-    setFiltrados([]);  // Limpa a lista de filtrados após a seleção
-  };
-  
+
 
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!token) {
+      alert("Token de autenticação não encontrado.");
+      return;
+    }
+
+    // Converte a data de "YYYY-MM-DD" para "DD/MM/YYYY"
+    const dataFormatada = novoAluno.data_pagamento.split('-').reverse().join('/');
+
+    // Ajustando os dados para enviar, incluindo a data formatada
+    const alunoParaCadastro = {
+      ...novoAluno,
+      data_pagamento: dataFormatada,  // Enviando a data formatada
+      faixa_atual: "azul",  // Ajuste conforme necessário
+    };
+
+    // Não remover o `userId` aqui, pois ele é necessário para associar o aluno ao usuário
+    console.log("Dados enviados para a criação do aluno:", alunoParaCadastro);
+
     fetch("http://10.200.200.62:5001/alunos/criar_aluno", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(novoAluno),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(alunoParaCadastro),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Aluno criado:", data);
+        console.log("Aluno criado com sucesso:", data);
+        router.push("/alunos/listar-alunos");
       })
-      .catch((err) => console.error("Erro ao criar aluno:", err));
+      .catch((err) => {
+        console.error("Erro ao criar aluno:", err);
+        alert("Ocorreu um erro ao criar o aluno.");
+      });
   };
 
 
+  const handleUserSelect = (usuario) => {
+    setNovoAluno({
+      ...novoAluno,
+      nome: usuario.nome,
+      email: usuario.email,
+      // Usando `id_usuario` em vez de `userId`
+      id_usuario: usuario.id_usuario,
+    });
+    setSearch(usuario.nome);
+    setFiltrados([]);
+    setUsuarioSelecionado(true);
+  };
 
+  // Define a data de hoje ao carregar a página
+  useEffect(() => {
+    const hoje = new Date().toISOString().split("T")[0]; // Obtém a data no formato YYYY-MM-DD
+    setNovoAluno((prev) => ({ ...prev, data_pagamento: hoje }));
+  }, []);
+
+  // Carregar professores da API
+  useEffect(() => {
+    const fetchProfessores = async () => {
+      try {
+        const response = await axios.get("http://10.200.200.62:5001/professores/");
+        setProfessores(response.data); // Supondo que a API retorne um array de professores
+      } catch (error) {
+        console.error("Erro ao carregar professores:", error);
+      }
+    };
+
+    fetchProfessores();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -110,38 +160,41 @@ function Alunos() {
         <div className="max-w-md mx-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="mb-3">
-
               <input
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
                 placeholder="Digite para filtrar"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+                disabled={usuarioSelecionado} // Desativa o campo após a seleção
               />
-             {filtrados.length > 0 && search && (
-  <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0">
-    {filtrados.map((usuario) => (
-      <li
-        key={usuario.id_usuario} // Usando id_usuario como chave
-        className="p-2 cursor-pointer hover:bg-gray-100"
-        onClick={() => handleUserSelect(usuario)} // Passando o objeto inteiro do usuário
-      >
-        {usuario.nome} {/* Exibindo o nome do usuário */}
-      </li>
-    ))}
-  </ul>
-)}
 
+              {filtrados.length > 0 && search && !usuarioSelecionado && (
+                <ul className="max-h-40 overflow-y-auto mt-1 border border-gray-300 p-0">
+                  {filtrados.map((usuario) => (
+                    <li
+                      key={usuario.id_usuario}
+                      className="p-2 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleUserSelect(usuario)}
+                    >
+                      {usuario.nome}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+
+
 
             <div>
               <input
                 type="email"
                 placeholder="Email"
                 value={novoAluno.email}
-                onChange={(e) =>
-                  setNovoAluno({ ...novoAluno, email: e.target.value })
-                }
+                readOnly
+                // onChange={(e) =>
+                //   setNovoAluno({ ...novoAluno, email: e.target.value })
+                // }
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
 
@@ -163,27 +216,68 @@ function Alunos() {
             <div>
               <input
                 type="text"
-                placeholder="Mátricula"
-                value={novoAluno.matricula}
+                placeholder="Nome Aluno"
+                value={novoAluno.nome}
                 onChange={(e) =>
-                  setNovoAluno({ ...novoAluno, matricula: e.target.value })
+                  setNovoAluno({ ...novoAluno, nome: e.target.value })
                 }
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-                style={{ display: "none" }}
+
               />
             </div>
+
+            <div>
+              <input
+                type="text"
+                placeholder="Valor"
+                value={novoAluno.valor}
+                onChange={(e) =>
+                  setNovoAluno({ ...novoAluno, valor: e.target.value })
+                }
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+
+              />
+            </div>
+
             <div>
               <input
                 type="date"
                 placeholder="Data pagamento"
                 value={novoAluno.data_pagamento}
                 onChange={(e) => {
-                  // Formata a data para garantir que esteja no formato correto (ano-mês-dia)
-                  const formattedDate = e.target.value;
-                  setNovoAluno({ ...novoAluno, data_pagamento: formattedDate });
+                  let formattedDate = e.target.value;
+
+                  // Extrai o dia, mês e ano da data
+                  let [ano, mes, dia] = formattedDate.split("-");
+
+                  // Obtém a data atual
+                  const hoje = new Date();
+                  const proximoMes = hoje.getMonth() + 1; // Mês atual + 1
+                  const anoAtual = hoje.getFullYear();
+
+                  // Se o mês atual for dezembro (12), o próximo mês será janeiro (01) do próximo ano
+                  if (proximoMes === 12) {
+                    dia = dia.padStart(2, "0"); // Certifica-se de que o dia tenha 2 dígitos
+                    mes = "01"; // Próximo mês é janeiro
+                    ano = (anoAtual + 1).toString(); // Avança para o próximo ano
+                  } else {
+                    mes = String(proximoMes + 1).padStart(2, "0"); // Avança para o próximo mês
+                  }
+
+                  // Ajusta a data com o próximo mês e um dos dias válidos (01, 05, 10, 20)
+                  if (["01", "05", "10", "20"].includes(dia)) {
+                    formattedDate = `${ano}-${mes}-${dia}`;
+                    setNovoAluno({ ...novoAluno, data_pagamento: formattedDate });
+                  } else {
+                    alert(
+                      "Por favor, selecione um dia de pagamento válido: 01, 05, 10 ou 20."
+                    );
+                  }
                 }}
-                className={`w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-    `} />
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+              />
             </div>
 
 
@@ -219,7 +313,6 @@ function Alunos() {
             </div>
             <div></div>
             <div>
-
               <select
                 value={novoAluno.professor}
                 onChange={(e) =>
@@ -230,13 +323,12 @@ function Alunos() {
                   } border border-gray-300 rounded appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23666%22 viewBox=%220 0 20 20%22%3E%3Cpath d=%22M5.516 7.548a.625.625 0 0 1 .884-.022L10 10.828l3.6-3.302a.625.625 0 1 1 .84.932l-4.02 3.69a.625.625 0 0 1-.84 0l-4.02-3.69a.625.625 0 0 1-.022-.884z%22/%3E%3C/svg%3E')] bg-no-repeat bg-right bg-[length:1.25rem]`}
               >
                 <option value="">Selecione o Professor</option>
-                <option value="Abner">Abner</option>
-                <option value="Fabio">Fabio</option>
-                <option value="Fabiana">Fabiana</option>
-                <option value="Mauro">Mauro</option>
+                {professores.map((professor) => (
+                  <option key={professor.id} value={professor.nome}>
+                    {professor.nome}
+                  </option>
+                ))}
               </select>
-
-
             </div>
             <div>
 
@@ -250,33 +342,33 @@ function Alunos() {
                   } border border-gray-300 rounded appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23666%22 viewBox=%220 0 20 20%22%3E%3Cpath d=%22M5.516 7.548a.625.625 0 0 1 .884-.022L10 10.828l3.6-3.302a.625.625 0 1 1 .84.932l-4.02 3.69a.625.625 0 0 1-.84 0l-4.02-3.69a.625.625 0 0 1-.022-.884z%22/%3E%3C/svg%3E')] bg-no-repeat bg-right bg-[length:1.25rem]`}
               >
                 <option value="">Selecione a faixa atual</option>
-                <option value="branca-infantil">Branca Infantil</option>
-                <option value="cinza">Cinza</option>
-                <option value="cinza-branca">Cinza Branca</option>
-                <option value="cinza-preta">Cinza Preta</option>
-                <option value="amarela">Amarela</option>
-                <option value="amarela-branca">Amarela Branca</option>
-                <option value="amarela-preta">Amarela Preta</option>
-                <option value="laranja">Laranja</option>
-                <option value="laranja-branca">Laranja Branca</option>
-                <option value="laranja-preta">Laranja Preta</option>
-                <option value="verde">Verde</option>
-                <option value="verde-branca">Verde Branca</option>
-                <option value="verde-preta">Verde Preta</option>
-                <option value="branca-adulto">Branca Adulto</option>
-                <option value="azul">Azul</option>
-                <option value="roxa">Roxa</option>
-                <option value="marrom">Marrom</option>
-                <option value="preta">Preta</option>
-                <option value="coral">Coral</option>
-                <option value="vermelha">Vermelha</option>
+                <option value="Branca-infantil">Branca Infantil</option>
+                <option value="Cinza">Cinza</option>
+                <option value="Cinza-branca">Cinza Branca</option>
+                <option value="Cinza-preta">Cinza Preta</option>
+                <option value="Amarela">Amarela</option>
+                <option value="Amarela-branca">Amarela Branca</option>
+                <option value="Amarela-preta">Amarela Preta</option>
+                <option value="Laranja">Laranja</option>
+                <option value="Laranja-branca">Laranja Branca</option>
+                <option value="Laranja-preta">Laranja Preta</option>
+                <option value="Verde">Verde</option>
+                <option value="Verde-branca">Verde Branca</option>
+                <option value="Verde-preta">Verde Preta</option>
+                <option value="Branca-adulto">Branca Adulto</option>
+                <option value="Azul">Azul</option>
+                <option value="Roxa">Roxa</option>
+                <option value="Marrom">Marrom</option>
+                <option value="Preta">Preta</option>
+                <option value="Coral">Coral</option>
+                <option value="Vermelha">Vermelha</option>
               </select>
 
             </div>
           </form>
           <div className="flex gap-4 mt-5">
             <button
-              type="submit"
+              onClick={handleSubmit} // Chamando handleSubmit ao clicar
               className="flex-1 py-2 bg-blue-500 text-white rounded"
             >
               Adicionar
