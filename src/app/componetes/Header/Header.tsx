@@ -71,11 +71,11 @@ function Header() {
                     </Link>
                   </li>
                  
-                  <li>
+                  {/* <li>
                     <Link href="/produtos/produto" onClick={toggleDrawer} className="block text-lg hover:text-blue-400">
                       Produtos
                     </Link>
-                  </li>
+                  </li> */}
                 </ul>
               )}
             </div>
@@ -105,11 +105,11 @@ function Header() {
                   Graduação
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/produtos/produto" className="text-white hover:text-gray-400">
                   Produtos
                 </Link>
-              </li>
+              </li> */}
           
             </>
           )}

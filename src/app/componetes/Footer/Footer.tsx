@@ -8,7 +8,7 @@ const Footer: FC = () => {
   const paddingClass = user?.role === "admin" ? "py-14" : "py-5";
 
   return (
-    <footer className={`bg-gray-800 text-white ${paddingClass}`}>
+    <footer className={`bg-gray-900 text-white ${paddingClass}`}>
       <div className="container mx-auto text-center">
         <p>&copy; {new Date().getFullYear()} Carioca BJJ. Todos os direitos reservados.</p>
         {user?.role !== "admin" && (

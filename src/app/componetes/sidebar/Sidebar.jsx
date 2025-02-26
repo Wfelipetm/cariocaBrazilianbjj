@@ -28,7 +28,7 @@ export default function Sidebar({ onNavigate }) {
     return (
         <div className="flex h-full">
             {isMobile ? (
-                <div className="fixed bottom-0 left-0 w-full h-32 bg-gray-800 text-white flex justify-around items-center">
+                <div className="fixed bottom-0 left-0 w-full h-32 bg-gray-900 text-white flex justify-around items-center">
                     <button onClick={() => handleNavigation("perfil")}>
                         <FaUserAlt size={40} />
                     </button>
@@ -40,7 +40,7 @@ export default function Sidebar({ onNavigate }) {
                     </button>
                 </div>
             ) : (
-                <div className="flex flex-col items-center left-0 top-0 h-full w-40 bg-gray-800 text-white py-4 relative">
+                <div className="flex flex-col items-center left-0 top-0 h-full w-40 bg-gray-900 text-white py-4 relative">
                     <button onClick={() => handleNavigation("perfil")} className="absolute top-4">
                         <FaUserAlt size={40} />
                     </button>
