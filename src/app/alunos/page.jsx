@@ -77,62 +77,46 @@ function Alunos() {
 
 
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     if (!token) {
       alert("Token de autenticação não encontrado.");
       return;
     }
-  
+
+    // Converte a data de "YYYY-MM-DD" para "DD/MM/YYYY"
     const dataFormatada = novoAluno.data_pagamento.split('-').reverse().join('/');
-    
+
+    // Ajustando os dados para enviar, incluindo a data formatada
     const alunoParaCadastro = {
       ...novoAluno,
-      data_pagamento: dataFormatada,
-      faixa_atual: "azul",
+      data_pagamento: dataFormatada,  // Enviando a data formatada
+      faixa_atual: "azul",  // Ajuste conforme necessário
     };
-  
-    try {
-      // Criar aluno
-      const alunoRes = await fetch("http://10.200.200.62:5001/alunos/criar_aluno", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(alunoParaCadastro),
+
+    // Não remover o `userId` aqui, pois ele é necessário para associar o aluno ao usuário
+    console.log("Dados enviados para a criação do aluno:", alunoParaCadastro);
+
+    fetch("http://10.200.200.62:5001/alunos/criar_aluno", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(alunoParaCadastro),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Aluno criado com sucesso:", data);
+        router.push("/alunos/listar-alunos");
+      })
+      .catch((err) => {
+        console.error("Erro ao criar aluno:", err);
+        alert("Ocorreu um erro ao criar o aluno.");
       });
-  
-      const alunoData = await alunoRes.json();
-      console.log("Aluno criado com sucesso:", alunoData);
-  
-      if (!alunoData.aluno_id) {
-        alert("Erro ao obter o ID do aluno.");
-        return;
-      }
-  
-      // Criar financeiro para todos os alunos vinculados ao id_usuario
-      const financeiroRes = await fetch("http://10.200.200.62:5001/financeiro/criar_financeiro", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ id_usuario: alunoParaCadastro.id_usuario, status_pagamento: "PENDENTE" }),
-      });
-  
-      const financeiroData = await financeiroRes.json();
-      console.log("Registro financeiro criado com sucesso:", financeiroData);
-  
-      router.push("/alunos/listar-alunos");
-    } catch (err) {
-      console.error("Erro:", err);
-      alert("Ocorreu um erro ao processar a requisição.");
-    }
   };
-  
-  
+
 
   const handleUserSelect = (usuario) => {
     setNovoAluno({
