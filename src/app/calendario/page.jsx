@@ -11,8 +11,15 @@ export default function Calendario() {
   const [aluno, setAluno] = useState(null);
   const [statusPagamentos, setStatusPagamentos] = useState(Array(12).fill(false));
   const [valoresPagamentos, setValoresPagamentos] = useState(Array(12).fill(0));
-
+  const [qrCode, setQrCode] = useState(null);
+  const [loading, setLoading] = useState(null);
+  const [error, setError] = useState(null);
+  const [qrCodeText, setQrCodeText] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [datasPagamentos, setDatasPagamentos] = useState(Array(12).fill(""));
   const { user } = useContext(AuthContext);
+
+
 
   useEffect(() => {
     async function fetchAluno() {
@@ -29,75 +36,86 @@ export default function Calendario() {
 
     async function fetchPagamentos() {
       try {
-        const response = await fetch("http://10.200.200.62:5001/financeiro/");
+        const response = await fetch(`http://10.200.200.62:5001/financeiro/${user.id}`);
         const pagamentos = await response.json();
 
+        // Verifique o que foi retornado na resposta
+        console.log("Pagamentos recebidos:", pagamentos);
         const pagamentosPorMes = Array(12).fill(0);
         const statusMap = Array(12).fill(false);
+        const datasMap = Array(12).fill(""); // Array para armazenar as datas de vencimento
 
         pagamentos.forEach((pagamento) => {
-          const dataPagamento = new Date(pagamento.data); // '2025-02-01T00:00:00.000Z'
-const mes = dataPagamento.getUTCMonth(); // Use getUTCMonth() para evitar confusão de fuso horário
-console.log(`Data de Referência: ${pagamento.data} -> Mês: ${mes} (${months[mes]})`);
+          const dataPagamento = new Date(pagamento.data_pagamento); // Data de vencimento do pagamento
+          // Ajusta para o horário local e corrige a data
+          const diaCorrigido = new Date(dataPagamento.getTime() + dataPagamento.getTimezoneOffset() * 60000);
 
+          const mes = diaCorrigido.getMonth();
 
+          // Soma o valor de cada pagamento para o mês correspondente
+          pagamentosPorMes[mes] += pagamento.valor;
 
-          // Log para verificar a data e o mês que está sendo processado
-          console.log(`Pagamento ID: ${pagamento.id}`);
-          console.log(`Data de Referência: ${pagamento.data} -> Mês: ${mes} (${months[mes]})`);
-          console.log(`Status do Pagamento: ${pagamento.status_pagamento}`);
+          // Atualiza o status como pago ou não
+          statusMap[mes] = pagamento.status_pagamento === "PAGO";
 
-          if (pagamento.status_pagamento === "PAGO") {
-            pagamentosPorMes[mes] += pagamento.valor;
-            statusMap[mes] = true; // Marca o mês como "Pago"
+          // Armazena a data corrigida no formato desejado
+          if (!datasMap[mes]) {
+            datasMap[mes] = diaCorrigido.toLocaleDateString("pt-BR"); // Formato dd/mm/aaaa
           }
         });
 
-        setValoresPagamentos(pagamentosPorMes);
-        setStatusPagamentos(statusMap); // Atualiza o status do pagamento
+        setValoresPagamentos(pagamentosPorMes); // Atualiza os valores totais por mês
+        setStatusPagamentos(statusMap); // Atualiza os status dos pagamentos por mês
+        setDatasPagamentos(datasMap); // Atualiza as datas dos pagamentos
 
       } catch (error) {
-        console.error("Erro ao buscar dados financeiros:", error);
+        console.error("Erro ao buscar pagamentos:", error);
       }
     }
 
     fetchAluno();
     fetchPagamentos();
-  }, [user.id]);
+  }, [user.id]); // Certifique-se de que o useEffect depende apenas de 'user.id'
 
-  const handleTogglePagamento = async (index, pagamentoId) => {
+  const handlePagamentoPix = async (index) => {
     try {
-      const novoStatus = statusPagamentos[index] ? "PENDENTE" : "PAGO";
-      const updatedStatusPagamentos = [...statusPagamentos];
-      updatedStatusPagamentos[index] = !updatedStatusPagamentos[index];
-      setStatusPagamentos(updatedStatusPagamentos);
+      setLoading(true);
+      setError(null);
+      setQrCode(null);
+      setQrCodeText(null);
 
-      const response = await fetch(`http://10.200.200.62:5001/financeiro/${pagamentoId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const valor = valoresPagamentos[index]; // Obtém o valor do pagamento do mês selecionado
+
+      if (!valor || isNaN(parseFloat(valor))) {
+        setError("Valor inválido para pagamento.");
+        return;
+      }
+
+      const response = await fetch("http://10.200.200.62:5001/api/payment/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          status_pagamento: novoStatus,
+          transaction_amount: parseFloat(valor),
+          description: `Pagamento do mês de ${months[index]}`,
+          payment_method_id: "pix",
+          payer: { email: user.email }
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar status do pagamento");
-      }
+      const data = await response.json();
 
-      const updatedPagamento = await response.json();
-      console.log("Pagamento atualizado no backend:", updatedPagamento);
+      if (!response.ok) throw new Error("Erro ao iniciar pagamento.");
+
+      setQrCode(data.qr_code_base64);
+      setQrCodeText(data.qr_code);
 
     } catch (error) {
-      console.error("Erro ao atualizar status de pagamento:", error);
-      setStatusPagamentos(statusPagamentos);
+      console.error(error);
+      setError("Erro ao processar pagamento.");
+    } finally {
+      setLoading(false);
     }
   };
-
-  if (!aluno) {
-    return <p className="text-white">Carregando...</p>;
-  }
 
   return (
     <section className="flex flex-col items-center justify-center h-full p-4 lg:ml-[235px] sm:ml-[100px]">
@@ -120,13 +138,29 @@ console.log(`Data de Referência: ${pagamento.data} -> Mês: ${mes} (${months[me
                   </div>
                   <div className="w-full mt-2 flex justify-center">
                     <button
-                      className="px-6 py-2 text-xs text-white rounded-md transition-all duration-300 bg-blue-600 hover:bg-blue-500 hover:scale-105 active:scale-95"
-                      onClick={() => handleTogglePagamento(index, 58)} 
+                      className="px-6 py-2 text-xs text-white rounded-md bg-blue-600 hover:bg-blue-500 hover:scale-105 active:scale-95"
+                      onClick={() => handlePagamentoPix(index)}
                     >
-                      {statusPagamentos[index] ? "Desfazer" : "Pix"}
+                      {statusPagamentos[index] ? "Pago" : "Pagar com Pix"}
                     </button>
+
                   </div>
                 </div>
+                {qrCode && (
+                  <div className="mt-4 flex flex-col items-center">
+                    <p className="text-white mb-2">Escaneie o QR Code para pagar:</p>
+                    <img src={`data:image/png;base64,${qrCode}`} alt="QR Code Pix" className="w-48 h-48" />
+                    <button
+                      className="mt-2 px-4 py-2 text-white bg-green-600 rounded-md"
+                      onClick={() => {
+                        navigator.clipboard.writeText(qrCodeText);
+                        setCopied(true);
+                      }}
+                    >
+                      {copied ? "Copiado!" : "Copiar Código Pix"}
+                    </button>
+                  </div>
+                )}
 
                 <div className="flex w-full gap-4">
                   <div className="flex flex-row justify-center items-center flex-grow p-4 bg-white/70 border-4 border-white rounded-lg lg:ml-[-10px] sm:ml-[-15px]">
@@ -141,7 +175,8 @@ console.log(`Data de Referência: ${pagamento.data} -> Mês: ${mes} (${months[me
                         )}
                         <span>{statusPagamentos[index] ? "Pago" : "Pendente"}</span>
                       </p>
-                      <p className="text-sm mt-1 text-center">{`Vencimento: ${aluno.data_pagamento}`}</p>
+                      <p className="text-sm mt-1 text-center">{`Vencimento: ${datasPagamentos[index] || "Não informado"}`}</p>
+
                     </div>
                   </div>
                 </div>
