@@ -79,25 +79,36 @@ function Alunos() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     if (!token) {
       alert("Token de autenticação não encontrado.");
       return;
     }
+  
+    const valorNumerico = parseFloat(novoAluno.valor);
 
+    // Verifica se o valor é válido
+    if (isNaN(valorNumerico) || valorNumerico <= 0) {
+      alert("Por favor, insira um valor válido.");
+      return;
+    }
+    
     // Converte a data de "YYYY-MM-DD" para "DD/MM/YYYY"
     const dataFormatada = novoAluno.data_pagamento.split('-').reverse().join('/');
-
-    // Ajustando os dados para enviar, incluindo a data formatada
+  
+    // Ajustando os dados para enviar, incluindo a data formatada e o valor numérico
     const alunoParaCadastro = {
       ...novoAluno,
       data_pagamento: dataFormatada,  // Enviando a data formatada
       faixa_atual: "azul",  // Ajuste conforme necessário
+      valor: novoAluno.valor  // Envia o valor sem arredondar
+
     };
-
-    // Não remover o `userId` aqui, pois ele é necessário para associar o aluno ao usuário
+    
+  
     console.log("Dados enviados para a criação do aluno:", alunoParaCadastro);
-
+  
+    // Primeira requisição: Criar o aluno
     fetch("http://10.200.200.62:5001/alunos/criar_aluno", {
       method: "POST",
       headers: {
@@ -109,13 +120,35 @@ function Alunos() {
       .then((res) => res.json())
       .then((data) => {
         console.log("Aluno criado com sucesso:", data);
+  
+        // Após o aluno ser criado com sucesso, cria o financeiro
+        const financeiroParaCadastro = {
+          id_usuario: 28, // Substitua com o id do usuário autenticado
+          status_pagamento: "PENDENTE", // Ajuste conforme necessário
+        };
+  
+        // Segunda requisição: Criar o financeiro
+        return fetch("http://10.200.200.62:5001/financeiro/criar_financeiro", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify(financeiroParaCadastro),
+        });
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Financeiro criado com sucesso:", data);
+        // Após o financeiro ser criado com sucesso, redireciona para a lista de alunos
         router.push("/alunos/listar-alunos");
       })
       .catch((err) => {
-        console.error("Erro ao criar aluno:", err);
-        alert("Ocorreu um erro ao criar o aluno.");
+        console.error("Erro ao criar aluno ou financeiro:", err);
+        alert("Ocorreu um erro ao criar o aluno ou financeiro.");
       });
   };
+  
 
 
   const handleUserSelect = (usuario) => {
@@ -228,18 +261,29 @@ function Alunos() {
             </div>
 
             <div>
-              <input
-                type="text"
-                placeholder="Valor"
-                value={novoAluno.valor}
-                onChange={(e) =>
-                  setNovoAluno({ ...novoAluno, valor: e.target.value })
-                }
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+            <input
+  type="text"
+  placeholder="Valor"
+  value={novoAluno.valor}
+  onChange={(e) => {
+    let valor = e.target.value;
+  
+    // Remove tudo o que não seja número ou ponto decimal
+    valor = valor.replace(/[^0-9.]/g, '');
+  
+    // Garantir que apenas um ponto seja permitido e no formato correto
+    const regex = /^(\d+(\.\d{0,2})?)?$/;
+    if (regex.test(valor)) {
+      setNovoAluno({ ...novoAluno, valor: valor });
+    }
+  }}
+  required
+  className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+/>
 
-              />
-            </div>
+</div>
+
+
 
             <div>
               <input
