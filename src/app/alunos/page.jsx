@@ -64,38 +64,31 @@ function Alunos() {
       setFiltrados([]);
       return;
     }
-
     const nomesFiltrados = nomes.filter((usuario) =>
       usuario.nome.toLowerCase().includes(valorBusca.toLowerCase())
     );
-
     setFiltrados(nomesFiltrados);
   };
 
 
 
-
-
-
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     if (!token) {
       alert("Token de autenticação não encontrado.");
       return;
     }
-  
     const valorNumerico = parseFloat(novoAluno.valor);
-
     // Verifica se o valor é válido
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
       alert("Por favor, insira um valor válido.");
       return;
     }
-    
+
     // Converte a data de "YYYY-MM-DD" para "DD/MM/YYYY"
     const dataFormatada = novoAluno.data_pagamento.split('-').reverse().join('/');
-  
+
     // Ajustando os dados para enviar, incluindo a data formatada e o valor numérico
     const alunoParaCadastro = {
       ...novoAluno,
@@ -104,10 +97,10 @@ function Alunos() {
       valor: novoAluno.valor  // Envia o valor sem arredondar
 
     };
-    
-  
+
+
     console.log("Dados enviados para a criação do aluno:", alunoParaCadastro);
-  
+
     // Primeira requisição: Criar o aluno
     fetch("http://10.200.200.62:5001/alunos/criar_aluno", {
       method: "POST",
@@ -120,15 +113,15 @@ function Alunos() {
       .then((res) => res.json())
       .then((data) => {
         console.log("Aluno criado com sucesso:", data);
-  
+
         // Após o aluno ser criado com sucesso, cria o financeiro
         const financeiroParaCadastro = {
           id_usuario: 28, // Substitua com o id do usuário autenticado
-          status_pagamento: "PENDENTE", // Ajuste conforme necessário
+          numeroMeses: 48, // Ajuste conforme necessário
         };
-  
+
         // Segunda requisição: Criar o financeiro
-        return fetch("http://10.200.200.62:5001/financeiro/criar_financeiro", {
+        return fetch("http://10.200.200.62:5001/financeiro/criar_financeiro_mensal", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -148,7 +141,7 @@ function Alunos() {
         alert("Ocorreu um erro ao criar o aluno ou financeiro.");
       });
   };
-  
+
 
 
   const handleUserSelect = (usuario) => {
@@ -261,27 +254,27 @@ function Alunos() {
             </div>
 
             <div>
-            <input
-  type="text"
-  placeholder="Valor"
-  value={novoAluno.valor}
-  onChange={(e) => {
-    let valor = e.target.value;
-  
-    // Remove tudo o que não seja número ou ponto decimal
-    valor = valor.replace(/[^0-9.]/g, '');
-  
-    // Garantir que apenas um ponto seja permitido e no formato correto
-    const regex = /^(\d+(\.\d{0,2})?)?$/;
-    if (regex.test(valor)) {
-      setNovoAluno({ ...novoAluno, valor: valor });
-    }
-  }}
-  required
-  className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
-/>
+              <input
+                type="text"
+                placeholder="Valor"
+                value={novoAluno.valor}
+                onChange={(e) => {
+                  let valor = e.target.value;
 
-</div>
+                  // Remove tudo o que não seja número ou ponto decimal
+                  valor = valor.replace(/[^0-9.]/g, '');
+
+                  // Garantir que apenas um ponto seja permitido e no formato correto
+                  const regex = /^(\d+(\.\d{0,2})?)?$/;
+                  if (regex.test(valor)) {
+                    setNovoAluno({ ...novoAluno, valor: valor });
+                  }
+                }}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:border-blue-500 focus:outline-none"
+              />
+
+            </div>
 
 
 
